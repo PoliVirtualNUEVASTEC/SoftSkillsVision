@@ -8,7 +8,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import matplotlib.pyplot as plt
 
-
+#draw_landmarks_on_image: se encarga de dibujar los puntos de referencia faciales en la imagen
 def draw_landmarks_on_image(rgb_image, detection_result):
     face_landmarks_list = detection_result.face_landmarks
     annotated_image = np.copy(rgb_image)
@@ -42,7 +42,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         )
     return annotated_image
 
-
+#proccess_image: Carga una imagen, utilizando el modelo de MediaPipe para detectar los puntos de referencia faciales y luego
+#muestra la imagen anotada con los puntos de referencia faciales dibujados
 def process_image(image_path, model_path):
     if not os.path.exists(image_path):
         print(f"Error: No se encontró la imagen '{image_path}'")
@@ -71,12 +72,18 @@ def process_image(image_path, model_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
+#La función main especifica la ruta de la imagen y del modelo, y llama a process_image para procesar la imagen.
 def main():
     image_path = "image.png"
     model_path = "face_landmarker_v2_with_blendshapes.task"
     process_image(image_path, model_path)
 
+    """
+    
+    list_image_path = ["image1.png", "image2.png", "image3.png"]
+    for image_path in list_image_path:
+        process_image(image_path, model_path)
+    """
 
 if __name__ == "__main__":
     main()
