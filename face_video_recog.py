@@ -43,17 +43,15 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     return annotated_image
 
 
-def process_image(image_path, model_path):
-    if not os.path.exists(image_path):
-        print(f"Error: No se encontró la imagen '{image_path}'")
+def process_video(video_path, model_path):
+    if not os.path.exists(video_path):
+        print(f"Error: No se encontró el video '{video_path}'")
         return
     if not os.path.exists(model_path):
         print(f"Error: No se encontró el modelo '{model_path}'")
         return
 
-    img = cv2.imread(image_path)
-    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+    cap = cv2.VideoCapture(video_path)
     base_options = python.BaseOptions(model_asset_path=model_path)
     options = vision.FaceLandmarkerOptions(
         base_options=base_options,
@@ -63,19 +61,28 @@ def process_image(image_path, model_path):
     )
     detector = vision.FaceLandmarker.create_from_options(options)
 
-    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_img)
-    detection_result = detector.detect(image)
-    annotated_image = draw_landmarks_on_image(rgb_img, detection_result)
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    cv2.imshow("Face Landmarks Image", cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
-    cv2.waitKey(0)
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+        detection_result = detector.detect(image)
+        annotated_frame = draw_landmarks_on_image(rgb_frame, detection_result)
+
+        cv2.imshow("Face Landmarks Video", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
     cv2.destroyAllWindows()
 
 
 def main():
-    image_path = "image.png"
+    video_path = "video.mp4"
     model_path = "face_landmarker_v2_with_blendshapes.task"
-    process_image(image_path, model_path)
+    process_video(video_path, model_path)
 
 
 if __name__ == "__main__":
