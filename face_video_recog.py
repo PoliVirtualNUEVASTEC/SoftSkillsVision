@@ -4,9 +4,7 @@ import cv2
 import mediapipe as mp
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-import matplotlib.pyplot as plt
+from fer import FER
 
 
 def draw_landmarks_on_image(rgb_image, detection_result):
@@ -51,32 +49,7 @@ def process_video(video_path, model_path):
         print(f"Error: No se encontró el modelo '{model_path}'")
         return
 
-    cap = cv2.VideoCapture(video_path)
-    base_options = python.BaseOptions(model_asset_path=model_path)
-    options = vision.FaceLandmarkerOptions(
-        base_options=base_options,
-        output_face_blendshapes=True,
-        output_facial_transformation_matrixes=True,
-        num_faces=1
-    )
-    detector = vision.FaceLandmarker.create_from_options(options)
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        detection_result = detector.detect(image)
-        annotated_frame = draw_landmarks_on_image(rgb_frame, detection_result)
-
-        cv2.imshow("Face Landmarks Video", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 
 def main():

@@ -7,12 +7,13 @@ from mediapipe.framework.formats import landmark_pb2
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import matplotlib.pyplot as plt
+from fer import FER
 
 #draw_landmarks_on_image: se encarga de dibujar los puntos de referencia faciales en la imagen
 def draw_landmarks_on_image(rgb_image, detection_result):
     face_landmarks_list = detection_result.face_landmarks
     annotated_image = np.copy(rgb_image)
-
+    #DOCUMENTAR
     for face_landmarks in face_landmarks_list:
         face_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
         face_landmarks_proto.landmark.extend([
@@ -72,9 +73,26 @@ def process_image(image_path, model_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
+    #-----------------Emotion Detection-----------------
+    #Detectar emoción con FER
+    emotion, score = detect_emotion(rgb_img)
+    if emotion:
+        cv2.putText(annotated_image, f"{emotion} ({score:.2f})", (50, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+    cv2.imshow("Face Landmarks & Emotion", cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def detect_emotion(image):
+    detector = FER()
+    emotion, score = detector.top_emotion(image)
+    return emotion, score
+
 #La función main especifica la ruta de la imagen y del modelo, y llama a process_image para procesar la imagen.
 def main():
-    image_path = "image.png"
+    image_path = "image1.png"
     model_path = "face_landmarker_v2_with_blendshapes.task"
     process_image(image_path, model_path)
 
