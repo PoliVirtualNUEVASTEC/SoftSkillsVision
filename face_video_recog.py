@@ -4,13 +4,14 @@ import cv2
 import mediapipe as mp
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 from fer import FER
 
-
+# Función para dibujar los landmarks faciales en un frame
 def draw_landmarks_on_image(rgb_image, detection_result):
     face_landmarks_list = detection_result.face_landmarks
     annotated_image = np.copy(rgb_image)
-
     for face_landmarks in face_landmarks_list:
         face_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
         face_landmarks_proto.landmark.extend([
@@ -40,7 +41,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         )
     return annotated_image
 
-
+# Función para procesar video
 def process_video(video_path, model_path):
     if not os.path.exists(video_path):
         print(f"Error: No se encontró el video '{video_path}'")
@@ -49,14 +50,58 @@ def process_video(video_path, model_path):
         print(f"Error: No se encontró el modelo '{model_path}'")
         return
 
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("Error al abrir el video")
+        return
 
+    # Inicializar el detector de landmarks faciales de MediaPipe
+    base_options = python.BaseOptions(model_asset_path=model_path)
+    options = vision.FaceLandmarkerOptions(
+        base_options=base_options,
+        output_face_blendshapes=True,
+        output_facial_transformation_matrixes=True,
+        num_faces=1
+    )
+    detector = vision.FaceLandmarker.create_from_options(options)
 
+    # Inicializar el detector de emociones de FER
+    emotion_detector = FER()
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Convertir de BGR a RGB
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+
+        # Detección de landmarks faciales
+        detection_result = detector.detect(image)
+        annotated_frame = draw_landmarks_on_image(rgb_frame, detection_result)
+
+        # Detección de emoción con FER
+        emotion, score = emotion_detector.top_emotion(rgb_frame)
+        if emotion:
+            cv2.putText(annotated_frame, f"{emotion} ({score:.2f})", (50, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            #print(f"EMOTION: {emotion}  SCORE: {score:.2f}")
+
+        # Mostrar el frame anotado
+        cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
+
+        # Presiona 'q' para salir
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 def main():
-    video_path = "video.mp4"
-    model_path = "face_landmarker_v2_with_blendshapes.task"
+    video_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/video.mov"  # Reemplaza con la ruta de tu video
+    model_path = "face_landmarker_v2_with_blendshapes.task"  # Ruta del modelo de MediaPipe
     process_video(video_path, model_path)
-
 
 if __name__ == "__main__":
     main()

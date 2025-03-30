@@ -80,6 +80,8 @@ def process_image(image_path, model_path):
     if emotion:
         cv2.putText(annotated_image, f"{emotion} ({score:.2f})", (50, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        print(f'--------------------EMOTION: {emotion}--------------------')
+        print(f'--------------------PUNTUACIÓN: {score}--------------------')
 
     cv2.imshow("Face Landmarks & Emotion", cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
     cv2.waitKey(0)
@@ -92,7 +94,7 @@ def detect_emotion(image):
 
 #La función main especifica la ruta de la imagen y del modelo, y llama a process_image para procesar la imagen.
 def main():
-    image_path = "image1.png"
+    image_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/IMG_20241025_110846565.jpg"
     model_path = "face_landmarker_v2_with_blendshapes.task"
     process_image(image_path, model_path)
 
