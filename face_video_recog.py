@@ -11,7 +11,12 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
 # Función para dibujar los landmarks faciales en un frame
+
+""" 
+Este script utiliza la librería MediaPipe para detectar landmarks faciales y la librería FER para detectar emociones en un video.
+"""
 def draw_landmarks_on_image(rgb_image, detection_result):
+    """Utiliza MediaPipe para detectar landmarks faciales y dibujarlos en cada frame del video."""
     face_landmarks_list = detection_result.face_landmarks
     annotated_image = np.copy(rgb_image)
     for face_landmarks in face_landmarks_list:
@@ -19,7 +24,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         face_landmarks_proto.landmark.extend([
             landmark_pb2.NormalizedLandmark(x=lm.x, y=lm.y, z=lm.z) for lm in face_landmarks
         ])
-
+        # Dibuja la malla facial
         solutions.drawing_utils.draw_landmarks(
             image=annotated_image,
             landmark_list=face_landmarks_proto,
@@ -27,6 +32,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
             landmark_drawing_spec=None,
             connection_drawing_spec=mp.solutions.drawing_styles.get_default_face_mesh_tesselation_style()
         )
+        # Dibuja los contornos faciales
         solutions.drawing_utils.draw_landmarks(
             image=annotated_image,
             landmark_list=face_landmarks_proto,
@@ -34,6 +40,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
             landmark_drawing_spec=None,
             connection_drawing_spec=mp.solutions.drawing_styles.get_default_face_mesh_contours_style()
         )
+        # Dibuja los iris
         solutions.drawing_utils.draw_landmarks(
             image=annotated_image,
             landmark_list=face_landmarks_proto,
@@ -43,7 +50,11 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         )
     return annotated_image
 
-# Función para procesar video
+"""Cada frame del video se procesa para:
+    1. Convertirlo de formato BGR a RGB.
+    2. Detectar los landmarks faciales utilizando MediaPipe.
+    3. Detectar la emoción utilizando la librería FER.
+    4. Dibujar los landmarks y la emoción detectada en el frame, en una ventana emergente"""
 def process_video(video_path, model_path):
     if not os.path.exists(video_path):
         print(f"Error: No se encontró el video '{video_path}'")
@@ -51,7 +62,8 @@ def process_video(video_path, model_path):
     if not os.path.exists(model_path):
         print(f"Error: No se encontró el modelo '{model_path}'")
         return
-
+  
+        
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("Error al abrir el video")
@@ -69,7 +81,7 @@ def process_video(video_path, model_path):
 
     # Inicializar el detector de emociones de FER
     emotion_detector = FER()
-
+    """ Se utiliza la librería FER para detectar emociones en el video."""
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -123,3 +135,28 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+Flujo general del script:
+1. Carga del video: Se verifica que el archivo de video y el modelo existan.
+2. Inicialización de detectores:
+   - Detector de landmarks faciales de MediaPipe.
+   - Detector de emociones de FER.
+3. Procesamiento frame por frame:
+   - Detección de landmarks faciales y dibujo de estos en el frame.
+   - Detección de emociones y superposición del texto correspondiente.
+   - Visualización del video procesado.
+4. Conexión a Google Drive: Lista los archivos en una carpeta específica (aunque no interactúa con ellos en el flujo principal).
+"""
+"""CV2 Se utiliza para:
+        1. Lectura del video. cap = cv2.VideoCapture(video_path)
+        2. Conversión de BGR a RGB. rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        3. Superposición de texto en el frame.  cv2.putText(annotated_frame, f"{emotion} ({score:.2f})", (50, 50),
+                                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        4. Visualización del video procesado. cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
+        5. Control del flujo del video.     if cv2.waitKey(1) & 0xFF == ord('q'):
+                                                break
+        6. Liberación de recursos al finalizar el procesamiento.
+            cap.release()
+            cv2.destroyAllWindows()
+        """
