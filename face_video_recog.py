@@ -7,6 +7,8 @@ from mediapipe.framework.formats import landmark_pb2
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from fer import FER
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
 
 # Función para dibujar los landmarks faciales en un frame
 def draw_landmarks_on_image(rgb_image, detection_result):
@@ -98,9 +100,25 @@ def process_video(video_path, model_path):
     cap.release()
     cv2.destroyAllWindows()
 
+def get_files_from_drive():
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+    SERVICE_ACCOUNT_FILE = 'C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/credentials.json'
+    creds = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE,scopes = SCOPES
+    )
+    service = build('drive', 'v3', credentials = creds) #Crear servicio de Google Drive
+    folder_id = "1SIiUPEmfQCwFfO3JIqGRlWjIKkQBqQkw" #ID de la carpeta en Google Drive
+
+    #Listando los archivos en la carpeta
+    query =  f"'{folder_id}' in parents and trashed=false"
+    results = service.files().list(q=query, fields="files(id, name)").execute()
+    files = results.get('files', [])
+    return files
+
 def main():
-    video_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/video.mov"  # Reemplaza con la ruta de tu video
-    model_path = "face_landmarker_v2_with_blendshapes.task"  # Ruta del modelo de MediaPipe
+    files_list = get_files_from_drive()
+    video_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/THOR Y LOKI.mp4"
+    model_path = "face_landmarker_v2_with_blendshapes.task"  #Ruta del modelo de MediaPipe
     process_video(video_path, model_path)
 
 if __name__ == "__main__":
