@@ -9,7 +9,8 @@ from mediapipe.tasks.python import vision
 from fer import FER
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-
+import json
+import math
 # Función para dibujar los landmarks faciales en un frame
 
 """ 
@@ -56,6 +57,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     3. Detectar la emoción utilizando la librería FER.
     4. Dibujar los landmarks y la emoción detectada en el frame, en una ventana emergente"""
 def process_video(video_path, model_path):
+    emotions_detected = []
+    score_detected = []
     if not os.path.exists(video_path):
         print(f"Error: No se encontró el video '{video_path}'")
         return
@@ -97,9 +100,15 @@ def process_video(video_path, model_path):
 
         # Detección de emoción con FER
         emotion, score = emotion_detector.top_emotion(rgb_frame)
+        if (emotion == None) and (score == None):
+            print("No se detectó emoción")
+        else:
+            emotions_detected.append(emotion)
+            score_detected.append(score)
+        
         if emotion:
-            cv2.putText(annotated_frame, f"{emotion} ({score:.2f})", (50, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(annotated_frame, f"{emotion}", (50, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (244, 211, 49), 2, cv2.LINE_AA)
             #print(f"EMOTION: {emotion}  SCORE: {score:.2f}")
 
         # Mostrar el frame anotado
@@ -108,6 +117,13 @@ def process_video(video_path, model_path):
         # Presiona 'q' para salir
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+        
+        emotions_data = [{"emotion": emotion, "score": score} for emotion, score in zip(emotions_detected, score_detected)]
+        # Convertir a JSON
+        json_output = json.dumps(emotions_data, indent=4)
+        name_json = os.path.basename(video_path).split(".")[0] + ".json"
+        with open(name_json, "w") as file:
+            json.dump(emotions_data, file, indent=4)
 
     cap.release()
     cv2.destroyAllWindows()
