@@ -16,6 +16,15 @@ import math
 """ 
 Este script utiliza la librería MediaPipe para detectar landmarks faciales y la librería FER para detectar emociones en un video.
 """
+emotions_dict = {
+    "neutral" : "NEUTRO",
+    "happy" : "FELIZ",
+    "sad" : "TRISTE",
+    "angry" : "ENFADADO",
+    "fear": "MIEDO",
+    "disgust" : "ASCO",
+    "surprise": "SORPRESA",
+}
 def draw_landmarks_on_image(rgb_image, detection_result):
     """Utiliza MediaPipe para detectar landmarks faciales y dibujarlos en cada frame del video."""
     face_landmarks_list = detection_result.face_landmarks
@@ -59,6 +68,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 def process_video(video_path, model_path):
     emotions_detected = []
     score_detected = []
+    emotion_detector = FER()
+
     if not os.path.exists(video_path):
         print(f"Error: No se encontró el video '{video_path}'")
         return
@@ -83,7 +94,7 @@ def process_video(video_path, model_path):
     detector = vision.FaceLandmarker.create_from_options(options)
 
     # Inicializar el detector de emociones de FER
-    emotion_detector = FER()
+    
     """ Se utiliza la librería FER para detectar emociones en el video."""
     while cap.isOpened():
         ret, frame = cap.read()
@@ -107,7 +118,7 @@ def process_video(video_path, model_path):
             score_detected.append(score)
         
         if emotion:
-            cv2.putText(annotated_frame, f"{emotion}", (50, 50),
+            cv2.putText(annotated_frame, f"{emotions_dict.get(emotion)}", (50, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (244, 211, 49), 2, cv2.LINE_AA)
             #print(f"EMOTION: {emotion}  SCORE: {score:.2f}")
 
@@ -120,7 +131,7 @@ def process_video(video_path, model_path):
         
         emotions_data = [{"emotion": emotion, "score": score} for emotion, score in zip(emotions_detected, score_detected)]
         # Convertir a JSON
-        json_output = json.dumps(emotions_data, indent=4)
+        json_output = json.dumps(emotions_data, indent=1)
         name_json = os.path.basename(video_path).split(".")[0] + ".json"
         with open(name_json, "w") as file:
             json.dump(emotions_data, file, indent=4)
@@ -130,7 +141,7 @@ def process_video(video_path, model_path):
 
 def get_files_from_drive():
     SCOPES = ['https://www.googleapis.com/auth/drive']
-    SERVICE_ACCOUNT_FILE = 'C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/credentials.json'
+    SERVICE_ACCOUNT_FILE = 'D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/credentials.json'
     creds = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE,scopes = SCOPES
     )
@@ -145,7 +156,7 @@ def get_files_from_drive():
 
 def main():
     files_list = get_files_from_drive()
-    video_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/THOR Y LOKI.mp4"
+    video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mov"
     model_path = "face_landmarker_v2_with_blendshapes.task"  #Ruta del modelo de MediaPipe
     process_video(video_path, model_path)
 
