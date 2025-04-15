@@ -70,18 +70,13 @@ def process_video(video_path, model_path):
     score_detected = []
     emotion_detector = FER()
 
-    if not os.path.exists(video_path):
-        print(f"Error: No se encontró el video '{video_path}'")
-        return
-    if not os.path.exists(model_path):
-        print(f"Error: No se encontró el modelo '{model_path}'")
-        return
-  
-        
+    if not os.path.exists(video_path) or not os.path.exists(model_path):
+        return []
+     
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        print("Error al abrir el video")
-        return
+        #print("Error al abrir el video")
+        return[]
 
     # Inicializar el detector de landmarks faciales de MediaPipe
     base_options = python.BaseOptions(model_asset_path=model_path)
@@ -130,14 +125,16 @@ def process_video(video_path, model_path):
             break
         
         emotions_data = [{"emotion": emotion, "score": score} for emotion, score in zip(emotions_detected, score_detected)]
-        # Convertir a JSON
-        json_output = json.dumps(emotions_data, indent=1)
+        
+        #json_output = json.dumps(emotions_data, indent=1)
         name_json = os.path.basename(video_path).split(".")[0] + ".json"
         with open(name_json, "w") as file:
             json.dump(emotions_data, file, indent=4)
 
+   
     cap.release()
     cv2.destroyAllWindows()
+    return [{"emotion": emo, "score": sc} for emo, sc in zip(emotions_detected, score_detected)]
 
 def get_files_from_drive():
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -156,12 +153,10 @@ def get_files_from_drive():
 
 def main():
     files_list = get_files_from_drive()
-    video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mov"
+    video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mp4"
     model_path = "face_landmarker_v2_with_blendshapes.task"  #Ruta del modelo de MediaPipe
     process_video(video_path, model_path)
 
-if __name__ == "__main__":
-    main()
 
 """
 Flujo general del script:
