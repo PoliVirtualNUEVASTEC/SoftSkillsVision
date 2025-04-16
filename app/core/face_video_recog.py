@@ -118,32 +118,26 @@ def process_video(video_path, model_path):
             #print(f"EMOTION: {emotion}  SCORE: {score:.2f}")
 
         # Mostrar el frame anotado
-        cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
+        #cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
 
         # Presiona 'q' para salir
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
-        emotions_data = [{"emotion": emotion, "score": score} for emotion, score in zip(emotions_detected, score_detected)]
-        
-        #json_output = json.dumps(emotions_data, indent=1)
-        name_json = os.path.basename(video_path).split(".")[0] + ".json"
-        with open(name_json, "w") as file:
-            json.dump(emotions_data, file, indent=4)
 
    
     cap.release()
     cv2.destroyAllWindows()
-    return [{"emotion": emo, "score": sc} for emo, sc in zip(emotions_detected, score_detected)]
+    json_to_return = [{"emotion": emo, "score": sc} for emo, sc in zip(emotions_detected, score_detected)]
+    return json_to_return
 
-def get_files_from_drive():
+def get_files_from_drive(folder_id:str):
     SCOPES = ['https://www.googleapis.com/auth/drive']
     SERVICE_ACCOUNT_FILE = 'D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/credentials.json'
     creds = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE,scopes = SCOPES
     )
     service = build('drive', 'v3', credentials = creds) #Crear servicio de Google Drive
-    folder_id = "1SIiUPEmfQCwFfO3JIqGRlWjIKkQBqQkw" #ID de la carpeta en Google Drive
+    #folder_id = "1SIiUPEmfQCwFfO3JIqGRlWjIKkQBqQkw" #ID de la carpeta en Google Drive
 
     #Listando los archivos en la carpeta
     query =  f"'{folder_id}' in parents and trashed=false"

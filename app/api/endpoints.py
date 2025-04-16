@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from app.core.face_video_recog import process_video
+from app.core.face_video_recog import get_files_from_drive
 from typing import List
 from app.model.EmotionResult import EmotionResult
+from fastapi import APIRouter, HTTPException
+from app.utils.drive import download_video_from_drive
+import os
 
 router = APIRouter()
 
@@ -21,12 +25,23 @@ def process_video_endpoint(
     """
     return process_video(video_path, model_path)
 
-@router.get("/analyze-video/")
-def analyze_emotions():
-    video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mp4"
-    model_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/face_landmarker_v2_with_blendshapes.task"
-    try:
-        emotions = process_video(video_path, model_path)
-        return JSONResponse(content={"emotions": emotions})
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+@router.get("/analyze-drive/")
+def analyze_emotions_from_drive(file_id: str):
+    list_videos_from_drive = get_files_from_drive(file_id)
+    model_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/face_landmarker_v2_with_blendshapes.task"
+    resultado = []
+    for video in list_videos_from_drive:
+        try:           
+            video_path = download_video_from_drive(video["id"])            
+            emotions = process_video(video_path, model_path)
+            os.remove(video_path)
+            resultado.append({
+                "video_nombre": video["name"],
+                "video_id": video["id"],
+                "emociones": emotions
+            })
+            #JsonResponse =  JSONResponse(content={"emotions": emotions})
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    return resultado
+    
