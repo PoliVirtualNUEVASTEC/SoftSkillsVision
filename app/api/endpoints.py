@@ -25,7 +25,7 @@ def process_video_endpoint(
     """
     return process_video(video_path, model_path)
 
-@router.get("/analyze-drive/")
+@router.get("/analyze-drive")
 def analyze_emotions_from_drive(file_id: str):
     list_videos_from_drive = get_files_from_drive(file_id)
     model_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/face_landmarker_v2_with_blendshapes.task"
@@ -36,8 +36,8 @@ def analyze_emotions_from_drive(file_id: str):
             emotions = process_video(video_path, model_path)
             os.remove(video_path)
             resultado.append({
-                "video_nombre": video["name"],
-                "video_id": video["id"],
+                "id": video["id"],
+                "nombre": video["name"],
                 "emociones": emotions
             })
             #JsonResponse =  JSONResponse(content={"emotions": emotions})
