@@ -17,13 +17,13 @@ import math
 Este script utiliza la librería MediaPipe para detectar landmarks faciales y la librería FER para detectar emociones en un video.
 """
 emotions_dict = {
-    "neutral" : "NEUTRO",
-    "happy" : "FELIZ",
-    "sad" : "TRISTE",
-    "angry" : "ENFADADO",
-    "fear": "MIEDO",
-    "disgust" : "ASCO",
-    "surprise": "SORPRESA",
+    "neutral" : "Neutro",
+    "happy" : "Feliz",
+    "sad" : "Triste",
+    "angry" : "Enfadado",
+    "fear": "Miedo",
+    "disgust" : "Desagrado",
+    "surprise": "Sorpresa"
 }
 def draw_landmarks_on_image(rgb_image, detection_result):
     """Utiliza MediaPipe para detectar landmarks faciales y dibujarlos en cada frame del video."""
@@ -69,7 +69,8 @@ def process_video(video_path, model_path):
     emotions_detected = []
     score_detected = []
     emotion_detector = FER()
-
+    emotions_detected_prom = ["Neutro","Feliz","Triste","Enfadado","Miedo","Desagrado","Sorpresa"]
+    score_detected_prom = [0.00,0.00,0.00,0.00,0.00,0.00,0.00]
     if not os.path.exists(video_path) or not os.path.exists(model_path):
         return []
      
@@ -118,16 +119,36 @@ def process_video(video_path, model_path):
             #print(f"EMOTION: {emotion}  SCORE: {score:.2f}")
 
         # Mostrar el frame anotado
-        #cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
+        cv2.imshow("Video - Face Landmarks & Emotion", cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR))
 
         # Presiona 'q' para salir
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-   
+
     cap.release()
     cv2.destroyAllWindows()
-    json_to_return = [{"emotion": emo, "score": sc} for emo, sc in zip(emotions_detected, score_detected)]
+    for i in range(len(emotions_detected)):
+        if emotions_detected[i] == "neutral":
+            score_detected_prom[0] = score_detected_prom[0] + score_detected[i]
+        elif emotions_detected[i] == "happy":
+            score_detected_prom[1] = score_detected_prom[1] + score_detected[i]
+        elif emotions_detected[i] == "sad":
+            score_detected_prom[2] = score_detected_prom[2] + score_detected[i]
+        elif emotions_detected[i] == "angry":
+            score_detected_prom[3] = score_detected_prom[3] + score_detected[i]
+        elif emotions_detected[i] == "fear":
+            score_detected_prom[4] = score_detected_prom[4] + score_detected[i]
+        elif emotions_detected[i] == "disgust":
+            score_detected_prom[5] = score_detected_prom[5] + score_detected[i]
+        elif emotions_detected[i] == "surprise":
+            score_detected_prom[6] = score_detected_prom[6] + score_detected[i]
+    for i in range(len(score_detected_prom)):
+        score_detected_prom[i] = score_detected_prom[i] / len(score_detected)
+        
+
+
+    json_to_return = [{"emotion": emo, "score": sc} for emo, sc in zip(emotions_detected_prom, score_detected_prom)]
     return json_to_return
 
 def get_files_from_drive(folder_id:str):
@@ -145,11 +166,11 @@ def get_files_from_drive(folder_id:str):
     files = results.get('files', [])
     return files
 
-def main():
-    files_list = get_files_from_drive()
-    video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mp4"
-    model_path = "face_landmarker_v2_with_blendshapes.task"  #Ruta del modelo de MediaPipe
-    process_video(video_path, model_path)
+#def main():
+    #files_list = get_files_from_drive()
+    #video_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/PSICOLOGA_1_2025-03-27.mp4"
+    #model_path = "face_landmarker_v2_with_blendshapes.task"  #Ruta del modelo de MediaPipe
+    #process_video(video_path, model_path)
 
 
 """
