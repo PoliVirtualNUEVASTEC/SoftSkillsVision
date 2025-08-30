@@ -153,7 +153,7 @@ def process_video(video_path, model_path):
 
 def get_files_from_drive(folder_id:str):
     SCOPES = ['https://www.googleapis.com/auth/drive']
-    SERVICE_ACCOUNT_FILE = 'D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/credentials.json'
+    SERVICE_ACCOUNT_FILE = 'F:/Documents/GitHub/SoftSkillsVision/credentials.json'
     creds = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE,scopes = SCOPES
     )

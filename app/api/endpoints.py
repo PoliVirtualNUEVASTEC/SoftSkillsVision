@@ -28,7 +28,7 @@ def process_video_endpoint(
 @router.get("/analyze-drive")
 def analyze_emotions_from_drive(file_id: str):
     list_videos_from_drive = get_files_from_drive(file_id)
-    model_path = "D:/UNIVERSIDAD_1/SEMESTRE 2025 - 1/TRABAJO DE GRADO/SoftSkillsVision/SoftSkillsVision/face_landmarker_v2_with_blendshapes.task"
+    model_path = "F:/Documents/GitHub/SoftSkillsVision/face_landmarker_v2_with_blendshapes.task"
     resultado = []
     for video in list_videos_from_drive:
         try:           
