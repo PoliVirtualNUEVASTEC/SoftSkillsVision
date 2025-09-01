@@ -1,10 +1,54 @@
-# Default ignored files
+# Entornos virtuales
+.venv/
+venv/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de log
+*.log
+
+# Archivos de configuración local
+.env
+*.env
+.env.*
+
+# Archivos de bases de datos locales o temporales
+*.sqlite3
+*.db
+
+# Configuración de editores
+# VSCode
+.vscode/
+# PyCharm
+.idea/
+# JetBrains project files
+*.iml
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de pruebas o resultados
+*.coverage
+htmlcov/
+.coverage.*
+.cache
+.tox/
+nosetests.xml
+test-output/
+
+# Archivos generados por Jupyter Notebook
+.ipynb_checkpoints/
+
+# Archivos específicos de tu proyecto
+/credentials.json
+
+# Otros archivos que ya mencionaste
 /shelf/
 /workspace.xml
-# Editor-based HTTP Client requests
 /httpRequests/
-# Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-.venv/
-/credentials.json
