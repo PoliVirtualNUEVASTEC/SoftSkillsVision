@@ -1,16 +1,26 @@
+# Framework API
 fastapi
-uvicorn
+uvicorn[standard]
+
+# Procesamiento de imágenes y video
 opencv-python
 opencv-contrib-python
 numpy
 mediapipe
+
+# Machine Learning / Deep Learning
 tensorflow
+fer  # Reconocimiento de emociones
+
+# Manipulación multimedia
 ffmpeg-python
 moviepy
-fer
+
+# Google API (Drive, OAuth, etc.)
 google-api-python-client
 google-auth
 google-auth-oauthlib
-pydantic
-gdown
+gdown   # Descargar modelos desde Google Drive
 
+# Validaciones y modelos
+pydantic

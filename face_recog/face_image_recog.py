@@ -94,7 +94,7 @@ def detect_emotion(image):
 
 #La función main especifica la ruta de la imagen y del modelo, y llama a process_image para procesar la imagen.
 def main():
-    image_path = "C:/Users/carta/IdeaProjects/SoftSkillsVision/SoftSkillsVision/IMG_20241025_110846565.jpg"
+    image_path = "F:/Documents/GitHub/SoftSkillsVision/IMG_20241025_110846565.jpg"
     model_path = "face_landmarker_v2_with_blendshapes.task"
     process_image(image_path, model_path)
 
